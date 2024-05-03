@@ -1,16 +1,4 @@
-// Fetch
-//
-// POST
- 
 const BASE_URL = 'https://pokeapi.co/api/v2/';
- 
-// Fetch no async
-/*
-fetch(BASE_URL + 'pokemon/ditto')
-    .then(res => res.json())
-    .then(data => console.log(data));
-*/
-// fetch async
  
 const fetchPokemon = async (pokemon) => {
     try {
@@ -22,52 +10,88 @@ const fetchPokemon = async (pokemon) => {
     }
 }
  
-// Obtener pokemon
-document.getElementById('get-btn')
-    .addEventListener('click', async () => {
-        const text = document.getElementById('poke-name').value.toLowerCase();
-        const pokemon = await fetchPokemon(text);
-        localStorage.setItem('currentPokeId', pokemon.id);
-        console.log(pokemon.name);
+const renderPokemonCard = (pokemon) => {
+    let card = document.getElementById('pokemon-card');
  
-        renderPokemonCard(pokemon);
-    })
+    // Guardar la información del Pokémon en el localStorage
+    localStorage.setItem('currentPokemon', JSON.stringify(pokemon));
+ 
+    if (!card) {
+        const cardContainer = document.getElementById('pokemon-card-container');
+        card = document.createElement('div');
+        card.id = 'pokemon-card';
+        card.classList.add('pokemon-card');
+        cardContainer.appendChild(card);
+    }
+ 
+    card.innerHTML = '';
+ 
+    const nameElement = document.createElement('h3');
+    nameElement.textContent = `Nombre: ${pokemon.name}`;
+ 
+    const idElement = document.createElement('p');
+    idElement.textContent = `ID: ${pokemon.id}`;
+ 
+    const weightElement = document.createElement('p');
+    weightElement.textContent = `Peso: ${pokemon.weight} kg`;
+ 
+    const typeElement = document.createElement('p');
+    typeElement.textContent = `Tipo: ${pokemon.types[0].type.name}`;
+ 
+    const imageElement = document.createElement('img');
+    imageElement.src = pokemon.sprites.front_default;
+    imageElement.alt = pokemon.name;
+ 
+    card.appendChild(nameElement);
+    card.appendChild(idElement);
+    card.appendChild(weightElement);
+    card.appendChild(typeElement);
+    card.appendChild(imageElement);
+ 
+    const cardContainer = document.getElementById('pokemon-card-container');
+    cardContainer.appendChild(card);
+}
  
 document.addEventListener('DOMContentLoaded', async () => {
-    const storedId = localStorage.getItem('currentPokeId');
-    const initialId = storedId ? parseInt(storedId) : 1;
-    const pokemon = await fetchPokemon(initialId);
+    const storedPokemon = localStorage.getItem('currentPokemon');
+    if (storedPokemon) {
+        const pokemon = JSON.parse(storedPokemon);
+        renderPokemonCard(pokemon);
+    }
+});
+ 
+document.getElementById('get-btn').addEventListener('click', async () => {
+    const text = document.getElementById('poke-name').value.toLowerCase();
+    const pokemon = await fetchPokemon(text);
+    localStorage.setItem('currentPokeId', pokemon.id);
     console.log(pokemon.name);
+ 
     renderPokemonCard(pokemon);
-})
+});
  
-// obtener el anterior
-//
-//
-// obtener el siguiente
- 
-document.getElementById('previous-btn')
-    .addEventListener('click', async () => {
-        const currentPokeId = parseInt(localStorage.getItem('currentPokeId'));
-        const newId = Math.max(1, currentPokeId -1);
-        const pokemon = await fetchPokemon(newId);
+document.getElementById('previous-btn').addEventListener('click', async () => {
+    let currentPokeId = parseInt(localStorage.getItem('currentPokeId'));
+    const newId = Math.max(1, currentPokeId - 1);
+    if (newId !== currentPokeId) {
+        currentPokeId = newId;
+        localStorage.setItem('currentPokeId', currentPokeId);
+        const pokemon = await fetchPokemon(currentPokeId);
         console.log(pokemon.name);
         renderPokemonCard(pokemon);
-    })
+    }
+});
  
-document.getElementById('next-btn')
-    .addEventListener('click', async () => {
-        const currentPokeId = parseInt(localStorage.getItem('currentPokeId'));
-        const newId = currentPokeId + 1;
-        const pokemon = await fetchPokemon(newId);
-        console.log(pokemon);
+document.getElementById('next-btn').addEventListener('click', async () => {
+    let currentPokeId = parseInt(localStorage.getItem('currentPokeId'));
+    const newId = Math.max(1, currentPokeId + 1);
+    if (newId !== currentPokeId) {
+        currentPokeId = newId;
+        localStorage.setItem('currentPokeId', currentPokeId);
+        const pokemon = await fetchPokemon(currentPokeId);
+        console.log(pokemon.name);
         renderPokemonCard(pokemon);
-    })
- 
- 
- 
-////////////////// POST
-//
+    }
+});
  
 fetch('https://jsonplaceholder.typicode.com/posts', {
     method: 'POST',
@@ -80,37 +104,4 @@ fetch('https://jsonplaceholder.typicode.com/posts', {
         'Content-type': 'application/json; charset=UTF-8',
     }
 }).then(res => res.json())
-    .then(json => console.log(json))
- 
-// Función para renderizar la tarjeta del Pokémon en el DOM
-const renderPokemonCard = (pokemon) => {
-    const cardContainer = document.getElementById('pokemon-card-container');
- 
-    // Crear elementos para la tarjeta
-    const card = document.createElement('div');
-    card.classList.add('pokemon-card');
- 
-    const nameElement = document.createElement('h3');
-    nameElement.textContent = pokemon.name;
-   
-    const imageElement = document.createElement('img');
-    imageElement.src = pokemon.sprites.front_default;
-    
-    // Agregar elementos a la tarjeta
-    card.appendChild(nameElement);
-    card.appendChild(imageElement);
- 
-    // Agregar tarjeta al contenedor en el DOM
-    cardContainer.appendChild(card);
-
-
-}
-
- 
- 
-/////////////////// EJERCICIOS
-//- Arreglar el pokemon en localStorage
-// - Manipular el DOM y agregar una tarjeta del pokemon.
-// - El tamaño e info de la tarjeta es a consideración personal.
-// - La tarjeta debe mantenerse en la pantalla.
-// - La info -> LocalStorage -> Fetch
+    .then(json => console.log(json));
